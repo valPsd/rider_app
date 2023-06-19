@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "170904826922",
+    "project_id": "avnmetaverse",
+    "storage_bucket": "avnmetaverse.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170904826922:android:cc9e52e2e9d8d3783dbf53",
+        "android_client_info": {
+          "package_name": "com.example.riderapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "170904826922-ng6m0d893g1sotiun0stfbjgstc2fm53.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCl_9QhmuN26xRk9Kgqy0THD2MoEJOowxQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "170904826922-ng6m0d893g1sotiun0stfbjgstc2fm53.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

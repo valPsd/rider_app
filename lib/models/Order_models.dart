@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-List<Order> orderFromJson(String str) =>
-    List<Order>.from(json.decode(str).map((x) => Order.fromJson(x)));
+List<OrderModel> orderModelFromJson(String str) =>
+    List<OrderModel>.from(json.decode(str).map((x) => OrderModel.fromJson(x)));
 
-class Order {
-  Order(
+class OrderModel {
+  OrderModel(
       {required this.orderID,
       required this.addressID,
       required this.payID,
@@ -27,7 +27,7 @@ class Order {
   int status;
   String userID;
 
-  factory Order.fromJson(Map<String, dynamic> json) => Order(
+  factory OrderModel.fromJson(Map<String, dynamic> json) => OrderModel(
       orderID: json["id"],
       addressID: json["addressID"],
       payID: json["payID"],

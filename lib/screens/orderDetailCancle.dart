@@ -46,7 +46,7 @@ class _OrderDetailCState extends State<OrderDetailCPage> {
   }
 
   List<UserRider> listRider = [];
-  List<Order> listOrder = [];
+  List<OrderModel> listOrder = [];
   List<User> listUser = [];
   List<Address> listAddress = [];
   List<Menu> listMenu = [];
@@ -54,7 +54,7 @@ class _OrderDetailCState extends State<OrderDetailCPage> {
   List<OrderDetail> orderdeteil = [];
   List<int> Character = [];
 
-  Order order = Order(
+  OrderModel order = OrderModel(
       orderID: "",
       addressID: " ",
       payID: " ",
@@ -297,7 +297,7 @@ class _OrderDetailCState extends State<OrderDetailCPage> {
     var url = Uri.parse(path + "/Order");
 
     var response = await http.get(url);
-    List<Order> listOrderTemp = orderFromJson(response.body);
+    List<OrderModel> listOrderTemp = orderModelFromJson(response.body);
     for (var item in listOrderTemp) {
       if (item.orderID == widget.Orderid) {
         order = item;

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:quickalert/quickalert.dart';
@@ -32,7 +33,7 @@ class LicationPage extends StatefulWidget {
       required this.menus,
       required this.sendingChatID});
 
-  Order order;
+  OrderModel order;
   User user;
   List<CartDetail> orderDetails;
   //List<Order> listOrder = [];
@@ -47,9 +48,9 @@ class LicationPage extends StatefulWidget {
 }
 
 class _LicationPageState extends State<LicationPage> {
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://avn-websocket-order.onrender.com'),
-  );
+  // final _channel = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket-order.onrender.com'),
+  // );
   String path = Api().path;
   Address userAddress = Address(
       AddressID: '',
@@ -65,18 +66,51 @@ class _LicationPageState extends State<LicationPage> {
 
   @override
   void initState() {
-    _channel.stream.listen((onData) {
-      Map<String, dynamic> data = json.decode(onData);
-      if (widget.order.orderID == data['orderID']) {
-        if (int.parse(data['orderStatus']) == 4) {
-          showalertCancel();
-        } else {
-          setState(() {
-            status = int.parse(data['orderStatus']);
-          });
+    FirebaseFirestore.instance.collection("Orders").snapshots().listen((event) {
+      for (var change in event.docChanges) {
+        switch (change.type) {
+          case DocumentChangeType.added:
+            print("New City: ${change.doc.data()}");
+            if (widget.order.orderID == change.doc.data()!['orderID']) {
+              if (change.doc.data()!['orderStatus'] == 4) {
+                showalertCancel();
+              } else {
+                setState(() {
+                  status = change.doc.data()!['orderStatus'];
+                });
+              }
+            }
+            break;
+          case DocumentChangeType.modified:
+            print("Modified City: ${change.doc.data()}");
+            if (widget.order.orderID == change.doc.data()!['orderID']) {
+              if (change.doc.data()!['orderStatus'] == 4) {
+                showalertCancel();
+              } else {
+                setState(() {
+                  status = change.doc.data()!['orderStatus'];
+                });
+              }
+            }
+            break;
+          case DocumentChangeType.removed:
+            // TODO: Handle this case.
+            break;
         }
       }
     });
+    // _channel.stream.listen((onData) {
+    //   Map<String, dynamic> data = json.decode(onData);
+    //   if (widget.order.orderID == data['orderID']) {
+    //     if (int.parse(data['orderStatus']) == 4) {
+    //       showalertCancel();
+    //     } else {
+    //       setState(() {
+    //         status = int.parse(data['orderStatus']);
+    //       });
+    //     }
+    //   }
+    // });
     getStatusfromWidget();
     getData();
     super.initState();
@@ -137,7 +171,9 @@ class _LicationPageState extends State<LicationPage> {
     var url2 = Uri.parse("$path/Chat/Search?keyword=${widget.sendingChatID}");
 
     var response2 = await http.get(url2);
+    print(response2.body);
     List<ChatMessage> listMsg = ChatMessageFromJson(response2.body);
+    print(listMsg.length);
     Chat_Controller().clear();
     for (var msg in listMsg) {
       Chat_Controller().add(chat: msg);
@@ -548,11 +584,16 @@ class _LicationPageState extends State<LicationPage> {
         "$path/TransactionStore/Create?keyword1=$transStoreID&keyword2=${walletStore[0].walletID}&keyword3=$date&keyword4=$time&keyword5=$transName&keyword6=$incomeRestuarant");
     await http.post(url9);
 
-    _channel.sink.add(jsonEncode({
+    // _channel.sink.add(jsonEncode({
+    //   "storeID": widget.order.storeID,
+    //   "orderStatus": status,
+    //   "orderID": widget.order.orderID
+    // }));
+    FirebaseFirestore.instance.collection("Orders").doc("Realtime").set({
       "storeID": widget.order.storeID,
       "orderStatus": status,
       "orderID": widget.order.orderID
-    }));
+    });
 
     showalert();
   }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:riderapp/controller/chat_controller.dart';
@@ -17,9 +18,9 @@ class Body extends StatefulWidget {
 }
 
 class _BodyState extends State<Body> {
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://avn-websocket.onrender.com'),
-  );
+  // final _channel = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket.onrender.com'),
+  // );
 
   String riderID = "";
 
@@ -28,21 +29,59 @@ class _BodyState extends State<Body> {
     var idRider = Hive.box('id');
     riderID = idRider.get(0);
 
-    _channel.stream.listen((onData) {
-      Map<String, dynamic> data = json.decode(onData);
-      if (widget.sendChatID == data['SendingChatId'] &&
-          data['Sender'] != riderID) {
-        ChatMessage newChat = ChatMessage(
-            text: data['Message'],
-            chatID: data['Id'],
-            date: data['Date'],
-            time: data['Time'],
-            sendingChatID: data['SendingChatId'],
-            sender: data['Sender']);
-        Chat_Controller().add(chat: newChat);
+    FirebaseFirestore.instance.collection("Chats").snapshots().listen((event) {
+      for (var change in event.docChanges) {
+        switch (change.type) {
+          case DocumentChangeType.added:
+            print("New City: ${change.doc.data()}");
+            // if (widget.sendChatID == change.doc.data()!['SendingChatId'] &&
+            //     change.doc.data()!['Sender'] != riderID) {
+            //   ChatMessage newChat = ChatMessage(
+            //       text: change.doc.data()!['Message'],
+            //       chatID: change.doc.data()!['Id'],
+            //       date: change.doc.data()!['Date'],
+            //       time: change.doc.data()!['Time'],
+            //       sendingChatID: change.doc.data()!['SendingChatId'],
+            //       sender: change.doc.data()!['Sender']);
+            //   Chat_Controller().add(chat: newChat);
+            // }
+            break;
+          case DocumentChangeType.modified:
+            print("Modified City: ${change.doc.data()}");
+            if (widget.sendChatID == change.doc.data()!['SendingChatId'] &&
+                change.doc.data()!['Sender'] != riderID) {
+              ChatMessage newChat = ChatMessage(
+                  text: change.doc.data()!['Message'],
+                  chatID: change.doc.data()!['Id'],
+                  date: change.doc.data()!['Date'],
+                  time: change.doc.data()!['Time'],
+                  sendingChatID: change.doc.data()!['SendingChatId'],
+                  sender: change.doc.data()!['Sender']);
+              Chat_Controller().add(chat: newChat);
+            }
+            break;
+          case DocumentChangeType.removed:
+            // TODO: Handle this case.
+            break;
+        }
       }
     });
-    
+
+    // _channel.stream.listen((onData) {
+    //   Map<String, dynamic> data = json.decode(onData);
+    //   if (widget.sendChatID == data['SendingChatId'] &&
+    //       data['Sender'] != riderID) {
+    //     ChatMessage newChat = ChatMessage(
+    //         text: data['Message'],
+    //         chatID: data['Id'],
+    //         date: data['Date'],
+    //         time: data['Time'],
+    //         sendingChatID: data['SendingChatId'],
+    //         sender: data['Sender']);
+    //     Chat_Controller().add(chat: newChat);
+    //   }
+    // });
+
     super.initState();
   }
 

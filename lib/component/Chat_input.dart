@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:http/http.dart' as http;
@@ -15,9 +16,9 @@ class ChatInputField extends StatelessWidget {
 
   final messageController = TextEditingController();
 
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://avn-websocket.onrender.com'),
-  );
+  // final _channel = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket.onrender.com'),
+  // );
 
   @override
   Widget build(BuildContext context) {
@@ -140,14 +141,22 @@ class ChatInputField extends StatelessWidget {
 
     Chat_Controller().add(chat: newMsg);
 
-    _channel.sink.add(jsonEncode({
+    // _channel.sink.add(jsonEncode({
+    //   "Id": newMsg.chatID,
+    //   "Date": newMsg.date,
+    //   "Time": newMsg.time,
+    //   "Message": newMsg.text,
+    //   "SendingChatId": newMsg.sendingChatID,
+    //   "Sender": newMsg.sender,
+    // }));
+    FirebaseFirestore.instance.collection("Chats").doc("Realtime").set({
       "Id": newMsg.chatID,
       "Date": newMsg.date,
       "Time": newMsg.time,
       "Message": newMsg.text,
       "SendingChatId": newMsg.sendingChatID,
       "Sender": newMsg.sender,
-    }));
+    });
 
     messageController.text = '';
   }

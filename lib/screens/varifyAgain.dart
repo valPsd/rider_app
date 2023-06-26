@@ -352,6 +352,7 @@ class _VaerifyAState extends State<VaerifyA> {
   }
 
   VerifyAgain() async {
+    await create();
     _imageurl = _imageurl.replaceAll('&', '%23');
     _imageurl2 = _imageurl2.replaceAll('&', '%23');
 
@@ -379,6 +380,7 @@ class _VaerifyAState extends State<VaerifyA> {
         "/VerifyRider/UpdateStatus?keyword1=$idV&keyword2=$status&keyword3=$adminID");
 
     var res2 = await http.post(url2);
+    print(url);
     print(url2);
     print(res2.statusCode);
     Navigator.pushReplacement(

@@ -1,4 +1,5 @@
 // import 'dart:html';
+import 'dart:convert';
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart' as http;
 import 'package:firebase_storage/firebase_storage.dart';
 import '../models/Rider_models.dart';
 import '../models/Verify_models.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -27,6 +29,10 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // String path = "http://10.0.2.2:5212";
   String path = Api().path;
+  // final _channel = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket-rider.onrender.com'),
+  // );
+
   // final cameras = availableCameras();
   String password = '';
   bool isPasswordVisible = false;
@@ -841,6 +847,12 @@ class _RegisterPageState extends State<RegisterPage> {
       var url4 = Uri.parse(path +
           "/WalletRider/Create?keyword1=$walletID&keyword2=$id&keyword3=$balance");
       await http.post(url4);
+
+      FirebaseFirestore.instance
+          .collection("VerifyRiders")
+          .doc("Realtime")
+          .set({"verifyID": verifyID, "statusID": 'VS0'});
+      // _channel.sink.add(jsonEncode({"verifyID": verifyID, "statusID": 'VS0'}));
 
       Fluttertoast.showToast(msg: 'ลงทะเบียนสำเร็จ');
       Navigator.of(context).pop();

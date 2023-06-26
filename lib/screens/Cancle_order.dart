@@ -46,7 +46,7 @@ class _Cancle_OrderState extends State<Cancle_Order> {
   List<String> UsernameU = [];
 
   List<UserRider> listRider = [];
-  List<Order> listOrder = [];
+  List<OrderModel> listOrder = [];
   List<User> listUser = [];
   List<Address> listAddress = [];
   List<Menu> listMenu = [];
@@ -231,7 +231,7 @@ class _Cancle_OrderState extends State<Cancle_Order> {
     var url = Uri.parse(path + "/Order");
 
     var response = await http.get(url);
-    List<Order> listOrderTemp = orderFromJson(response.body);
+    List<OrderModel> listOrderTemp = orderModelFromJson(response.body);
     for (var order in listOrderTemp) {
       if (order.status == 4 && order.riderID == Rider.riderID) {
         listOrder.add(order);

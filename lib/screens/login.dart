@@ -271,7 +271,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   String path = Api().path;
-  Order currentOrder = Order(
+  OrderModel currentOrder = OrderModel(
       orderID: "",
       addressID: " ",
       payID: " ",
@@ -324,7 +324,7 @@ class _LoginPageState extends State<LoginPage> {
   getData() async {
     var url1 = Uri.parse("${Api().path}/Order");
     var response1 = await http.get(url1);
-    List<Order> listOrderTemp = orderFromJson(response1.body);
+    List<OrderModel> listOrderTemp = orderModelFromJson(response1.body);
     bool isFound = false;
     Fluttertoast.showToast(msg: "Login correct");
     for (var order in listOrderTemp) {

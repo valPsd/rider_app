@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:gradients/gradients.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -35,12 +36,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final _channel = WebSocketChannel.connect(
-    Uri.parse('wss://avn-websocket-rider.onrender.com'),
-  );
-  final _channelOrder = WebSocketChannel.connect(
-    Uri.parse('wss://avn-websocket-order.onrender.com'),
-  );
+  // final _channel = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket-rider.onrender.com'),
+  // );
+  // final _channelOrder = WebSocketChannel.connect(
+  //   Uri.parse('wss://avn-websocket-order.onrender.com'),
+  // );
 
   var glowing = false;
   var scale = 1.0;
@@ -95,7 +96,7 @@ class _HomePageState extends State<HomePage> {
   List<String> UsernameU = [];
 
   List<UserRider> listRider = [];
-  List<Order> listOrder = [];
+  List<OrderModel> listOrder = [];
   List<User> listUser = [];
   List<Address> listAddress = [];
   List<Menu> listMenu = [];
@@ -105,36 +106,90 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    _channel.stream.listen((onData) {
-      Map<String, dynamic> data = json.decode(onData);
-      if (VS.verifyID == data['verifyID']) {
-        if (data['statusID'] == 'VS5') {
-          Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => LoginPage(),
-              ));
-        } else {
-          getData();
+    FirebaseFirestore.instance.collection("VerifyRiders").snapshots().listen((event) {
+      for (var change in event.docChanges) {
+        switch (change.type) {
+          case DocumentChangeType.added:
+            print("New City: ${change.doc.data()}");
+            if (VS.verifyID == change.doc.data()!['verifyID']) {
+              if (change.doc.data()!['statusID'] == 'VS5') {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ));
+              } else {
+                getData();
+              }
+            }
+            break;
+          case DocumentChangeType.modified:
+            print("Modified City: ${change.doc.data()}");
+            if (VS.verifyID == change.doc.data()!['verifyID']) {
+              if (change.doc.data()!['statusID'] == 'VS5') {
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => LoginPage(),
+                    ));
+              } else {
+                getData();
+              }
+            }
+            break;
+          case DocumentChangeType.removed:
+            // TODO: Handle this case.
+            break;
         }
-        // setState(() {
-        //   VS.verifyStatusID = data['statusID'];
-        // });
       }
     });
-    _channelOrder.stream.listen((onData) {
-      //String dataString = onData.toString();
-      // Map<String, dynamic> data = json.decode(onData);
-      // var data = jsonDecode(onData);
-      // print(data.runtimeType);
-      // print(onData.runtimeType);
-      // if ((data['orderStatus']) == 0 ||
-      //     (data['orderStatus']) == 1 ||
-      //     (data['orderStatus']) == 4) {
-      //   getData();
-      // }
-      getData();
+    // _channel.stream.listen((onData) {
+    //   Map<String, dynamic> data = json.decode(onData);
+    //   if (VS.verifyID == data['verifyID']) {
+    //     if (data['statusID'] == 'VS5') {
+    //       Navigator.pushReplacement(
+    //           context,
+    //           MaterialPageRoute(
+    //             builder: (context) => LoginPage(),
+    //           ));
+    //     } else {
+    //       getData();
+    //     }
+    //     // setState(() {
+    //     //   VS.verifyStatusID = data['statusID'];
+    //     // });
+    //   }
+    // });
+    FirebaseFirestore.instance.collection("Orders").snapshots().listen((event) {
+      for (var change in event.docChanges) {
+        switch (change.type) {
+          case DocumentChangeType.added:
+            print("New City: ${change.doc.data()}");
+            getData();
+            break;
+          case DocumentChangeType.modified:
+            print("Modified City: ${change.doc.data()}");
+            getData();
+            break;
+          case DocumentChangeType.removed:
+            // TODO: Handle this case.
+            break;
+        }
+      }
     });
+    // _channelOrder.stream.listen((onData) {
+    //   //String dataString = onData.toString();
+    //   // Map<String, dynamic> data = json.decode(onData);
+    //   // var data = jsonDecode(onData);
+    //   // print(data.runtimeType);
+    //   // print(onData.runtimeType);
+    //   // if ((data['orderStatus']) == 0 ||
+    //   //     (data['orderStatus']) == 1 ||
+    //   //     (data['orderStatus']) == 4) {
+    //   //   getData();
+    //   // }
+    //   getData();
+    // });
     getData();
     super.initState();
   }
@@ -761,7 +816,7 @@ class _HomePageState extends State<HomePage> {
     var url = Uri.parse(path + "/Order");
 
     var response = await http.get(url);
-    List<Order> listOrderTemp = orderFromJson(response.body);
+    List<OrderModel> listOrderTemp = orderModelFromJson(response.body);
     listOrder = [];
     for (var order in listOrderTemp) {
       if (order.status == 0) {

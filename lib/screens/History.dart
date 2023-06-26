@@ -44,7 +44,7 @@ class _History extends State<History> {
   List<String> UsernameU = [];
 
   List<UserRider> listRider = [];
-  List<Order> listOrder = [];
+  List<OrderModel> listOrder = [];
   List<User> listUser = [];
   List<Address> listAddress = [];
   List<Menu> listMenu = [];
@@ -238,7 +238,7 @@ class _History extends State<History> {
     var url = Uri.parse(path + "/Order");
 
     var response = await http.get(url);
-    List<Order> listOrderTemp = orderFromJson(response.body);
+    List<OrderModel> listOrderTemp = orderModelFromJson(response.body);
     for (var order in listOrderTemp) {
       if (order.status == 3 && order.riderID == Rider.riderID) {
         listOrder.add(order);
